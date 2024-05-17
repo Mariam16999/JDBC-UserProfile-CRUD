@@ -1,0 +1,44 @@
+2024-05-15 13:27:29.118  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Starting UserProfileApplication using Java 11.0.15 on MariamJamal with PID 34868 (E:\Projects\java_projects\registerRequestBody-profile\target\classes started by Mariam.Jamal in E:\Projects\java_projects\registerRequestBody-profile)
+
+2024-05-15 13:27:29.129 DEBUG MariamJamal --- com.intercom.userprofile.UserProfileApplication : Running with Spring Boot v2.7.5, Spring v5.3.23
+
+2024-05-15 13:27:29.130  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : No active profile set, falling back to 1 default profile: "default"
+
+2024-05-15 13:27:32.172  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Started UserProfileApplication in 3.597 seconds (JVM running for 6.787)
+
+2024-05-15 13:28:02.369  INFO MariamJamal --- org.springframework.web.servlet.DispatcherServlet : Initializing Servlet 'dispatcherServlet'
+
+2024-05-15 13:28:02.371  INFO MariamJamal --- org.springframework.web.servlet.DispatcherServlet : Completed initialization in 2 ms
+
+2024-05-15 13:28:02.457  INFO MariamJamal --- com.intercom.userprofile.Controllers.UserProfileController : Register input:User(id=0, name=jemy12, address=cairo, userName=jemy16, password=123, mobileNumber=00201013164889, jobTitle=SW, nid=29909160100688)
+
+2024-05-15 13:29:30.960  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Starting UserProfileApplication using Java 11.0.15 on MariamJamal with PID 23544 (E:\Projects\java_projects\registerRequestBody-profile\target\classes started by Mariam.Jamal in E:\Projects\java_projects\registerRequestBody-profile)
+
+2024-05-15 13:29:30.968 DEBUG MariamJamal --- com.intercom.userprofile.UserProfileApplication : Running with Spring Boot v2.7.5, Spring v5.3.23
+
+2024-05-15 13:29:30.969  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : No active profile set, falling back to 1 default profile: "default"
+
+2024-05-15 13:29:33.061  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Started UserProfileApplication in 2.438 seconds (JVM running for 4.438)
+
+2024-05-15 13:30:44.956  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Starting UserProfileApplication using Java 11.0.15 on MariamJamal with PID 4788 (E:\Projects\java_projects\registerRequestBody-profile\target\classes started by Mariam.Jamal in E:\Projects\java_projects\registerRequestBody-profile)
+
+2024-05-15 13:30:44.969 DEBUG MariamJamal --- com.intercom.userprofile.UserProfileApplication : Running with Spring Boot v2.7.5, Spring v5.3.23
+
+2024-05-15 13:30:44.971  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : No active profile set, falling back to 1 default profile: "default"
+
+2024-05-15 13:30:47.975  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Started UserProfileApplication in 3.553 seconds (JVM running for 6.892)
+
+2024-05-15 13:36:37.885  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Starting UserProfileApplication using Java 11.0.15 on MariamJamal with PID 35908 (E:\Projects\java_projects\registerRequestBody-profile\target\classes started by Mariam.Jamal in E:\Projects\java_projects\registerRequestBody-profile)
+
+2024-05-15 13:36:37.899 DEBUG MariamJamal --- com.intercom.userprofile.UserProfileApplication : Running with Spring Boot v2.7.5, Spring v5.3.23
+
+2024-05-15 13:36:37.901  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : No active profile set, falling back to 1 default profile: "default"
+
+2024-05-15 13:36:40.915  INFO MariamJamal --- com.intercom.userprofile.UserProfileApplication : Started UserProfileApplication in 3.573 seconds (JVM running for 6.645)
+
+2024-05-15 13:36:57.637  INFO MariamJamal --- org.springframework.web.servlet.DispatcherServlet : Initializing Servlet 'dispatcherServlet'
+
+2024-05-15 13:36:57.639  INFO MariamJamal --- org.springframework.web.servlet.DispatcherServlet : Completed initialization in 1 ms
+
+2024-05-15 13:36:57.723  INFO MariamJamal --- com.intercom.userprofile.Controllers.UserProfileController : Register input:User(id=0, name=jemy12, address=cairo, userName=jemy16, password=123, mobileNumber=00201013164889, jobTitle=SW, nid=29909160100688)
+

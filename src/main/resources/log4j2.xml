@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30" strict="false" packages="com.ibm.log4j.filter">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%-10t] %m%n</Property>
+        <Property name="LOG_PATH">${bundle:application:logging.file.path}</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="FileAppender" fileName="${LOG_PATH}userProfile.log"
+                     filePattern="${LOG_PATH}userProfile.%d{dd-MMM-yyyy}.%i.log.gz">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100 MB" />
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1000" />
+        </RollingFile>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.intercom.dcg" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+
+        </Root>
+    </Loggers>
+</Configuration>
