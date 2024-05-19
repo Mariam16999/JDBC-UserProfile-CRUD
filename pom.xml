@@ -107,6 +107,7 @@
                 <db.userName>root</db.userName>
                 <db.password>root</db.password>
                 <context-path>/integration</context-path>
+                <fixed-delay>30000</fixed-delay>
             </properties>
         </profile>
     </profiles>

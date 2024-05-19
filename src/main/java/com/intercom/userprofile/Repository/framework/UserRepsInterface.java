@@ -10,5 +10,7 @@ public interface UserRepsInterface {
  int insertUser(RegisterRequestBody registerRequestBody);
  int updateUser(UpdateRequestBody updateRequestBody);
 
+ int userCount();
+
 
 }

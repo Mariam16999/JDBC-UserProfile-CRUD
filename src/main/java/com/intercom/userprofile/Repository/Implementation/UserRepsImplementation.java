@@ -63,4 +63,9 @@ public class UserRepsImplementation implements UserRepsInterface {
         return jdbcTemplate.update("UPDATE user_profile SET name=?, address=?, job_title=?, nid=?,  password=?, mobile=? WHERE username=? ",
                 UpdateRequestBody.getName(), UpdateRequestBody.getAddress(), UpdateRequestBody.getJobTitle(), UpdateRequestBody.getNid(), UpdateRequestBody.getPassword(), UpdateRequestBody.getMobileNumber(), UpdateRequestBody.getUserName());
     }
+
+    @Override
+    public int userCount() {
+        return jdbcTemplate.queryForObject("select count(*) from user_profile", Integer.class);
+    }
 }
