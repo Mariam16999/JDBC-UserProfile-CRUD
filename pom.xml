@@ -85,6 +85,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin.external.google</groupId>
+            <artifactId>android-json</artifactId>
+            <version>0.0.20131108.vaadin1</version>
+        </dependency>
 
     </dependencies>
 
@@ -108,6 +113,8 @@
                 <db.password>root</db.password>
                 <context-path>/integration</context-path>
                 <fixed-delay>30000</fixed-delay>
+                <RetrieveUserProfile.uri>http://localhost:8091/users/info</RetrieveUserProfile.uri>
+                <AccountHistory.uri>http://localhost:8092/users/history</AccountHistory.uri>
             </properties>
         </profile>
     </profiles>

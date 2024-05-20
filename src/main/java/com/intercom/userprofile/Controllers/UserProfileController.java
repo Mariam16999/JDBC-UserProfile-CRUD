@@ -2,10 +2,7 @@ package com.intercom.userprofile.Controllers;
 
 import com.intercom.userprofile.entity.RegisterRequestBody;
 import com.intercom.userprofile.entity.UpdateRequestBody;
-import com.intercom.userprofile.model.UpdateUserInfoResponse;
-import com.intercom.userprofile.model.User;
-import com.intercom.userprofile.model.deleteuserResponse;
-import com.intercom.userprofile.model.registerationResponse;
+import com.intercom.userprofile.model.*;
 import com.intercom.userprofile.service.Framework.UserServiceInterface;
 import io.undertow.util.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +38,7 @@ public class UserProfileController {
    }
 
     @GetMapping("/login")
-    public User login(@RequestParam String userName, @RequestParam String password) throws Exception
+    public LoginResponse login(@RequestParam String userName, @RequestParam String password) throws Exception
     {
 
         return userServiceInterface.login(userName,password);

@@ -23,6 +23,7 @@ import org.webjars.NotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 
 @RestControllerAdvice
@@ -95,24 +96,71 @@ public class ControllerExceptionHandlerAdvice {
 
     }
 
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+//        log.error("MethodArgumentNotValidException = ", e);
+//
+//        Map<String, String> errors = new HashMap<>();
+//        e.getBindingResult().getAllErrors().forEach(error -> {
+//            String fieldName = ((FieldError) error).getField();
+//            String errorMessage = error.getDefaultMessage();
+//            errors.put(fieldName, errorMessage);
+//        });
+//
+//        ErrorValidationResponse errorValidationResponse = ErrorValidationResponse.builder()
+//                .validationErrors(errors)
+//                .build();
+//
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(errorValidationResponse);
+//    }
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<MethodArgumentErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException = ", e);
+        MethodArgumentErrorResponse methodArgumentErrorResponse=new MethodArgumentErrorResponse();
+
+//        ErrorValidationResponse errorValidationResponse = ErrorValidationResponse.builder()
+//                .validationErrors(errors)
+//                .build();
 
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
+            methodArgumentErrorResponse.setMoreInformation(error.getDefaultMessage());
             errors.put(fieldName, errorMessage);
         });
 
-        ErrorValidationResponse errorValidationResponse = ErrorValidationResponse.builder()
-                .validationErrors(errors)
-                .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(errorValidationResponse);
+        methodArgumentErrorResponse.setMessage(HttpStatus.FORBIDDEN.getReasonPhrase());
+        methodArgumentErrorResponse.setCode(String.valueOf(HttpStatus.FORBIDDEN.value()));
+
+
+        return ResponseEntity .status(HttpStatus.FORBIDDEN)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(methodArgumentErrorResponse);
+
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(errorValidationResponse);
+    }
+
+    @ResponseBody
+    @ExceptionHandler(TimeoutException.class)
+    public ResponseEntity<TimeoutErrorResponse> timeoutErrorHandler (TimeoutException ex)
+    {
+        log.info("timeoutErrorResponseHandle");
+        TimeoutErrorResponse timeoutErrorResponse=new TimeoutErrorResponse();
+        timeoutErrorResponse.setMessage(HttpStatus.REQUEST_TIMEOUT.getReasonPhrase());
+        timeoutErrorResponse.setCode(String.valueOf(HttpStatus.REQUEST_TIMEOUT.value()));
+        timeoutErrorResponse.setMoreInformation(ex.getMessage());
+
+        return ResponseEntity .status(HttpStatus.REQUEST_TIMEOUT)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(timeoutErrorResponse);
+
+
     }
 //    @ResponseBody
 //    @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -1,25 +1,44 @@
 package com.intercom.userprofile.service.Implementation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intercom.userprofile.Repository.framework.UserRepsInterface;
+import com.intercom.userprofile.Utils.GenerateRefId;
+import com.intercom.userprofile.Utils.RetrieveUserProfileRequest;
 import com.intercom.userprofile.entity.RegisterRequestBody;
 import com.intercom.userprofile.entity.UpdateRequestBody;
-import com.intercom.userprofile.model.User;
-import com.intercom.userprofile.model.deleteuserResponse;
-import com.intercom.userprofile.model.registerationResponse;
-import com.intercom.userprofile.model.UpdateUserInfoResponse;
+import com.intercom.userprofile.model.*;
 import com.intercom.userprofile.service.Framework.UserServiceInterface;
 import io.quarkus.security.ForbiddenException;
 import io.quarkus.security.UnauthorizedException;
-import io.undertow.util.BadRequestException;
+import lombok.extern.log4j.Log4j2;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.w3c.dom.Document;
 import org.webjars.NotFoundException;
+import org.xml.sax.InputSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 
 @Component
+@Log4j2
 public class UserServiceImplementation implements UserServiceInterface {
 
     private final UserRepsInterface userRepsInterface;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     public UserServiceImplementation(UserRepsInterface userRepsInterface) {
@@ -39,47 +58,7 @@ public class UserServiceImplementation implements UserServiceInterface {
 
     @Override
     public UpdateUserInfoResponse updateUserInfo(UpdateRequestBody updateRequestBody) throws Exception {
-        if(updateRequestBody ==null)
-        {
-            throw new BadRequestException("Invalid Data");
-        }
 
-        if(updateRequestBody.getUserName()==null|| updateRequestBody.getUserName().isEmpty() )
-        {
-            throw new BadRequestException("Invalid Mail");
-        }
-        if(updateRequestBody.getName()==null|| updateRequestBody.getName().isEmpty())
-        {
-            throw new BadRequestException("Invalid Name");
-        }
-        if(updateRequestBody.getAddress()==null|| updateRequestBody.getAddress().isEmpty())
-        {
-            throw new BadRequestException("Invalid Address");
-        }
-        if(updateRequestBody.getJobTitle()==null|| updateRequestBody.getJobTitle().isEmpty())
-        {
-            throw new BadRequestException("Invalid JobTitle");
-        }
-        if(updateRequestBody.getNid()==null|| updateRequestBody.getNid().isEmpty())
-        {
-            throw new BadRequestException("Invalid Nid");
-        }
-        if(updateRequestBody.getMobileNumber()==null|| updateRequestBody.getMobileNumber().isEmpty())
-        {
-            throw new BadRequestException("Invalid MobileNumber");
-        }
-        if(updateRequestBody.getPassword()==null|| updateRequestBody.getPassword().isEmpty())
-        {
-            throw new BadRequestException("Invalid password");
-        }
-        if (!(updateRequestBody.getMobileNumber().matches("00201[0-2,5]{1}[0-9]{8}")) && !(updateRequestBody.getMobileNumber().matches("01[0-2,5]{1}[0-9]{8}")))
-        {
-            throw new BadRequestException("Invalid mobile Number");
-        }
-        if(!updateRequestBody.getNid().matches("^([1-9]{1})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})[0-9]{3}([0-9]{1})[0-9]{1}$"))
-        {
-            throw new BadRequestException("Invalid NID");
-        }
         if (userRepsInterface.updateUser(updateRequestBody) == 0) {
             throw new NotFoundException("User not found");
         }
@@ -95,9 +74,16 @@ public class UserServiceImplementation implements UserServiceInterface {
         return updateUserInfoResponse;
     }
 
+    @Value( "${RetrieveUserProfile.uri}")
+    private String retrieveUserProfileUrl;
 
+    @Value( "${AccountHistory.uri}")
+    private String accountHistoryUrl;
     @Override
-    public User login(String userName, String password) throws Exception {
+    public LoginResponse login(String userName, String password) throws Exception {
+        String responseEntity="";
+        LoginResponse loginResponse=new LoginResponse();
+        log.info("loginRequest"+userName +"  "+ password);
         User userFromDb = userRepsInterface.getUserByUserName(userName);
         if (userFromDb == null) {
             throw new NotFoundException("This userName doesn't exist");
@@ -105,53 +91,76 @@ public class UserServiceImplementation implements UserServiceInterface {
         if (!userFromDb.getPassword().equals(password)) {
             throw new UnauthorizedException("You Shall Not pass!!");
         }
-        return userRepsInterface.getUserByUserName(userName);
+        User user=userRepsInterface.getUserByUserName(userName);
+
+        //calling RetrieveUserProfileRequest to check UserNumber
+        RetrieveUserProfileRequest retrieveUserProfileRequest = new RetrieveUserProfileRequest();
+        String xmlRequest=retrieveUserProfileRequest.generateXmlRequest("300","20","01",""+user.getId());
+        HttpHeaders headers = new HttpHeaders();
+        URI uri=null;
+       try {
+           uri=new URI(retrieveUserProfileUrl);
+       } catch (URISyntaxException e) {
+           throw new NotFoundException("Service is currently not available");
+       }
+       headers.add("Content-Type",MediaType.APPLICATION_XML_VALUE);
+       headers.add("Accept",MediaType.APPLICATION_XML_VALUE);
+       try {
+           log.info("mockRequest"+xmlRequest);
+           RequestEntity requestEntity=new RequestEntity<>(xmlRequest,headers, HttpMethod.POST,URI.create(retrieveUserProfileUrl));
+            responseEntity=restTemplate.exchange(requestEntity,String.class).getBody();
+           log.info("mockResponse"+responseEntity);
+       } catch (Exception e) {
+           throw new TimeoutException( "TimeOut:Service is currently not available");
+       }
+       //Convert String to XML
+
+        // Create a DocumentBuilder
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        assert responseEntity != null;
+        Document document = builder.parse(new InputSource(new StringReader(responseEntity)));
+        String customerAccount=document.getElementsByTagName("CustomerAccount").item(0).getTextContent();
+        log.info("customerAccount"+customerAccount);
+
+        //Call AccountHistory
+        uri=null;
+        try {
+            uri=new URI(accountHistoryUrl);
+        } catch (URISyntaxException e) {
+            throw new NotFoundException("Service is currently not available");
+        }
+        headers.add("Content-Type", "application/json; charset=utf-8");
+        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        JSONObject parameters = new JSONObject();
+        parameters.put("customerAccount",customerAccount );
+        parameters.put("referenceId", GenerateRefId.generateRefNum());
+        RequestEntity requestEntity;
+         responseEntity="";
+        JSONObject jsonResponse;
+        try {
+            log.info("AccountHistoryRequest:"+parameters);
+            requestEntity = new RequestEntity(parameters.toString(), headers, HttpMethod.POST, URI.create(accountHistoryUrl));
+            responseEntity = restTemplate.exchange(requestEntity, String.class).getBody();
+        } catch (Exception e) {
+            throw new TimeoutException( "Service is currently not available");
+        }
+        log.info("AccountHistoryResponse:"+responseEntity);
+        //getting response from json
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> responseMap = mapper.readValue(responseEntity, Map.class);
+        Object history = responseMap.get("history");
+        log.info("history"+history);
+         loginResponse.setHistory((List<com.intercom.userprofile.model.history>) history);
+        loginResponse.setUser(user);
+        log.info("loginResponse"+loginResponse);
+        return loginResponse;
 
     }
 
     @Override
     public registerationResponse register(RegisterRequestBody registerRequestBody) throws Exception {
-//        if(registerRequestBody ==null)
-//        {
-//            throw new BadRequestException("Invalid Data");
-//        }
-//
-//        if(registerRequestBody.getUserName()==null|| registerRequestBody.getUserName().isEmpty() )
-//        {
-//            throw new BadRequestException("Invalid Mail");
-//        }
-//        if(registerRequestBody.getName()==null|| registerRequestBody.getName().isEmpty())
-//        {
-//            throw new BadRequestException("Invalid Name");
-//        }
-//        if(registerRequestBody.getAddress()==null|| registerRequestBody.getAddress().isEmpty())
-//        {
-//            throw new BadRequestException("Invalid Address");
-//        }
-//        if(registerRequestBody.getJobTitle()==null|| registerRequestBody.getJobTitle().isEmpty())
-//        {
-//            throw new BadRequestException("Invalid JobTitle");
-//        }
-//        if(registerRequestBody.getNid()==null|| registerRequestBody.getNid().isEmpty())
-//        {
-//            throw new BadRequestException("Invalid Nid");
-//        }
-//        if(registerRequestBody.getMobileNumber()==null|| registerRequestBody.getMobileNumber().isEmpty())
-//        {
-//            throw new BadRequestException("Invalid MobileNumber");
-//        }
-//        if(registerRequestBody.getPassword()==null|| registerRequestBody.getPassword().isEmpty())
-//        {
-//            throw new BadRequestException("Invalid password");
-//        }
-//        if (!(registerRequestBody.getMobileNumber().matches("00201[0-2,5]{1}[0-9]{8}")) && !(registerRequestBody.getMobileNumber().matches("01[0-2,5]{1}[0-9]{8}")))
-//        {
-//            throw new BadRequestException("Invalid mobile Number");
-//        }
-//        if(!registerRequestBody.getNid().matches("^([1-9]{1})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})[0-9]{3}([0-9]{1})[0-9]{1}$"))
-//        {
-//            throw new BadRequestException("Invalid NID");
-//        }
+
         registerationResponse registerationResponse = new registerationResponse();
         if (userRepsInterface.getUserByUserName(registerRequestBody.getUserName()) == null) {
             registerationResponse.setId(userRepsInterface.insertUser(registerRequestBody));
